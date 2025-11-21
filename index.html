@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance System</title>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+/* ---------------------- */
+/*        MOBILE FIRST    */
+/* ---------------------- */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+}
+
+/* NAVBAR */
+nav {
+    background: linear-gradient(to right, #0a58ca, #004a99);
+    padding: 12px;
+    color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-right: 15px;
+    font-weight: bold;
+}
+
+/* MAIN CONTAINER */
+.container {
+    padding: 15px;
+}
+
+/* TABLE */
+.table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: center;
+}
+th {
+    background: #e8f0ff;
+    font-weight: bold;
+}
+
+/* COLORS FOR ABSENCES */
+.row-green { background: #dfffe0; }
+.row-yellow { background: #fffacc; }
+.row-red { background: #ffd1d1; }
+
+/* FORM */
+.form-box {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    max-width: 300px;
+}
+.form-box input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+.error-msg {
+    color: red;
+    font-size: 12px;
+}
+
+/* BUTTONS */
+button {
+    padding: 8px 12px;
+    margin-right: 5px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.btn-blue { background: #0a58ca; color: white; }
+.btn-yellow { background: #f0ad4e; color: white; }
+.btn-grey { background: #6c757d; color: white; }
+
+/* REPORT BOX */
+.report-box {
+    background: white;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 8px;
+}
+
+/* ---------------------- */
+/*   DESKTOP ENHANCEMENT */
+/* ---------------------- */
+@media (min-width: 900px) {
+    .layout {
+        display: flex;
+        gap: 20px;
+    }
+    .table-side {
+        flex: 3;
+    }
+    .form-side {
+        flex: 1;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+    <a href="#">Home</a>
+    <a href="#">Attendance List</a>
+    <a href="#">Add Student</a>
+    <a href="#">Reports</a>
+    <a href="#">Logout</a>
+</nav>
+
+<div class="container layout">
+
+    <!-- ATTENDANCE TABLE SECTION -->
+    <div class="table-side">
+        <div class="table-wrapper">
+            <h2>Attendance Table</h2>
+
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Last Name</th>
+                        <th>First Name</th>
+
+                        <!-- S1..S6 -->
+                        <th>S1 P</th><th>S1 Pa</th>
+                        <th>S2 P</th><th>S2 Pa</th>
+                        <th>S3 P</th><th>S3 Pa</th>
+                        <th>S4 P</th><th>S4 Pa</th>
+                        <th>S5 P</th><th>S5 Pa</th>
+                        <th>S6 P</th><th>S6 Pa</th>
+
+                        <th>Absences</th>
+                        <th>Participations</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <!-- Default 3 Students -->
+                    <tr>
+                        <td>1001</td><td>Madani</td><td>Sara</td>
+                        <td></td><td></td>
+                        <td></td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td></td>
+                        <td>✔</td><td></td>
+                        <td></td><td></td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+
+                    <tr>
+                        <td>1002</td><td>ouziala</td><td>Ali</td>
+                        <td>✔</td><td></td>
+                        <td></td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td>✔</td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td></td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+
+                    <tr>
+                        <td>1003</td><td>houidef</td><td>Rania</td>
+                        <td></td><td></td>
+                        <td></td><td></td>
+                        <td></td><td></td>
+                        <td></td><td></td>
+                        <td></td><td></td>
+                        <td></td><td></td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+
+                    <!-- New Students -->
+                    <tr>
+                        <td>1004</td><td>Akal</td><td>Karim</td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td>✔</td>
+                        <td>✔</td><td></td>
+                        <td></td><td>✔</td>
+                        <td></td><td></td>
+                        <td>✔</td><td></td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+
+                    <tr>
+                        <td>1005</td><td>Sofia</td><td>Rami</td>
+                        <td></td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td>✔</td>
+                        <td>✔</td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td></td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+
+                    <tr>
+                        <td>1006</td><td>Hmidat</td><td>Walid</td>
+                        <td>✔</td><td></td>
+                        <td>✔</td><td></td>
+                        <td></td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+
+                    <tr>
+                        <td>1007</td><td>Kebir</td><td>Samir</td>
+                        <td></td><td>✔</td>
+                        <td>✔</td><td>✔</td>
+                        <td>✔</td><td></td>
+                        <td>✔</td><td></td>
+                        <td></td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+
+                    <tr>
+                        <td>1008</td><td>Mohamed kebir</td><td>Riham</td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td>✔</td>
+                        <td>✔</td><td></td>
+                        <td></td><td></td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+
+                    <tr>
+                        <td>1009</td><td>Moufouki</td><td>Aida</td>
+                        <td></td><td></td>
+                        <td>✔</td><td></td>
+                        <td></td><td>✔</td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td>✔</td>
+                        <td></td><td></td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+
+                    <tr>
+                        <td>1010</td><td>Messouaf</td><td>Nawal</td>
+                        <td>✔</td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td></td><td></td>
+                        <td>✔</td><td></td>
+                        <td>✔</td><td>✔</td>
+                        <td>✔</td><td>✔</td>
+                        <td class="abs"></td>
+                        <td class="part"></td>
+                        <td class="msg"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <br>
+
+            <button class="btn-blue" onclick="recalculate()">Recalculate</button>
+            <button class="btn-blue" onclick="showReport()">Show Report</button>
+            <button class="btn-yellow" id="highlightBtn">Highlight Excellent Students</button>
+            <button class="btn-grey" id="resetBtn">Reset Colors</button>
+        </div>
+
+        <!-- REPORT SECTION -->
+        <div class="report-box" id="reportBox"></div>
+    </div>
+
+    <!-- ADD STUDENT FORM -->
+    <div class="form-side">
+        <div class="form-box">
+            <h3>Add Student</h3>
+
+            <input id="idField" placeholder="Student ID">
+            <div class="error-msg" id="idErr"></div>
+
+            <input id="lastField" placeholder="Last Name">
+            <div class="error-msg" id="lastErr"></div>
+
+            <input id="firstField" placeholder="First Name">
+            <div class="error-msg" id="firstErr"></div>
+
+            <input id="emailField" placeholder="Email">
+            <div class="error-msg" id="emailErr"></div>
+
+            <button class="btn-blue" onclick="addStudent()">Submit</button>
+            <button class="btn-grey" onclick="clearForm()">Clear</button>
+
+            <br><br>
+            <small>
+                • ID must be numeric  
+                • Names letters only  
+                • Valid email required  
+            </small>
+        </div>
+    </div>
+</div>
+
+<script>
+/* -----------------------------------------------------
+   VALIDATION + ADD STUDENT
+------------------------------------------------------*/
+function clearForm() {
+    idField.value = "";
+    lastField.value = "";
+    firstField.value = "";
+    emailField.value = "";
+    $(".error-msg").text("");
+}
+
+function addStudent() {
+
+    let id = idField.value.trim();
+    let ln = lastField.value.trim();
+    let fn = firstField.value.trim();
+    let em = emailField.value.trim();
+
+    let valid = true;
+
+    $("#idErr").text(/^[0-9]+$/.test(id) ? "" : (valid=false, "ID must be numeric"));
+    $("#lastErr").text(/^[A-Za-z]+$/.test(ln) ? "" : (valid=false, "Letters only"));
+    $("#firstErr").text(/^[A-Za-z]+$/.test(fn) ? "" : (valid=false, "Letters only"));
+    $("#emailErr").text(/^\S+@\S+\.\S+$/.test(em) ? "" : (valid=false, "Invalid email"));
+
+    if (!valid) return;
+
+    // Add row dynamically
+    let row = `
+        <tr>
+            <td>${id}</td><td>${ln}</td><td>${fn}</td>
+            <td></td><td></td><td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td>
+            <td class="abs"></td>
+            <td class="part"></td>
+            <td class="msg"></td>
+        </tr>`;
+
+    $("#attendanceTable tbody").append(row);
+
+    alert("Student successfully added!");
+    clearForm();
+}
+
+/* -----------------------------------------------------
+   NEW FEATURE: TOGGLE P & Pa CELLS
+------------------------------------------------------*/
+$("#attendanceTable").on("click", "tbody td", function () {
+    let col = $(this).index();
+
+    // Only toggle inside S1..S6 (P and Pa columns)
+    if (col >= 3 && col <= 14) {
+        let val = $(this).text().trim();
+        $(this).text(val === "✔" ? "" : "✔");
+    }
+});
+
+/* -----------------------------------------------------
+   RECALCULATE ATTENDANCE
+------------------------------------------------------*/
+function recalculate() {
+    $("#attendanceTable tbody tr").each(function () {
+
+        let cells = $(this).find("td");
+
+        let presentCount = 0;
+        let partCount = 0;
+
+        // S1..S6: 12 cells
+        for (let i = 3; i < 15; i += 2) {
+            if ($(cells[i]).text() === "✔") presentCount++;
+            if ($(cells[i + 1]).text() === "✔") partCount++;
+        }
+
+        let abs = 6 - presentCount;
+
+        $(cells[15]).text(abs);
+        $(cells[16]).text(partCount);
+
+        $(this).removeClass("row-green row-yellow row-red");
+
+        if (abs < 3) $(this).addClass("row-green");
+        else if (abs <= 4) $(this).addClass("row-yellow");
+        else $(this).addClass("row-red");
+
+        let msg = "";
+        if (abs < 3 && partCount >= 3) msg = "Good attendance — Excellent participation";
+        else if (abs <= 4) msg = "Warning — You need to participate more";
+        else msg = "Excluded — too many absences";
+
+        $(cells[17]).text(msg);
+    });
+}
+
+/* -----------------------------------------------------
+   SHOW REPORT
+------------------------------------------------------*/
+function showReport() {
+    let rows = $("#attendanceTable tbody tr");
+
+    let total = rows.length;
+    let totalPresent = 0;
+    let totalPart = 0;
+
+    rows.each(function () {
+        totalPresent += 6 - parseInt($(this).find(".abs").text());
+        totalPart += parseInt($(this).find(".part").text());
+    });
+
+    $("#reportBox").html(
+        `<b>Total students:</b> ${total}<br>
+         <b>Total present marks:</b> ${totalPresent}<br>
+         <b>Total participations:</b> ${totalPart}`
+    );
+}
+
+/* -----------------------------------------------------
+   JQUERY EFFECTS
+------------------------------------------------------*/
+$("#attendanceTable tbody").on("mouseenter", "tr", function () {
+    $(this).css("background", "#e8f0ff");
+});
+$("#attendanceTable tbody").on("mouseleave", "tr", function () {
+    $(this).removeAttr("style");
+});
+
+// Highlight Excellent Students
+$("#highlightBtn").click(() => {
+    $("#attendanceTable tbody tr").each(function(){
+        let abs = parseInt($(this).find(".abs").text());
+        if (abs < 3) $(this).fadeOut(200).fadeIn(200);
+    });
+});
+
+// Reset colors
+$("#resetBtn").click(() => {
+    recalculate();
+});
+</script>
+
+</body>
+</html>
+
+

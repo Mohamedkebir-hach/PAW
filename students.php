@@ -1,7 +1,7 @@
 <?php
 /**
- * Unified Student Management Page
- * Follows Tutorial 2 + Tutorial 3 requirements
+ * AttendEase - Student Management Module
+ * Comprehensive CRUD operations for student records
  */
 require_once 'db_connect.php';
 
@@ -32,7 +32,7 @@ if (isset($_GET['delete'])) {
         try {
             $stmt = $conn->prepare("DELETE FROM students WHERE id = ?");
             $stmt->execute([$id]);
-            $message = "✅ Student deleted successfully!";
+            $message = "✅ Student record deleted successfully!";
         } catch (PDOException $e) {
             $error = "Delete error: " . $e->getMessage();
         }
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         $stmt = $conn->prepare("UPDATE students SET fullname=?, matricule=?, group_id=? WHERE id=?");
                         $stmt->execute([$fullname, $matricule, $group_id, $id]);
-                        $message = "✅ Student updated successfully!";
+                        $message = "✅ Student record updated successfully!";
                         $editStudent = null;
                     }
                 } else {
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         $stmt = $conn->prepare("INSERT INTO students(fullname, matricule, group_id) VALUES (?, ?, ?)");
                         $stmt->execute([$fullname, $matricule, $group_id]);
-                        $message = "✅ Student added successfully!";
+                        $message = "✅ New student added successfully!";
                     }
                 }
             } catch (PDOException $e) {
@@ -104,37 +104,37 @@ if ($conn) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Manage Students</title>
+    <title>Student Management - AttendEase</title>
     <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<!-- 🔥 SAME TOP HEADER AS THE HOMEPAGE -->
 <header class="topbar">
-  <div class="brand">
-    <div class="logo">👥</div>
-    <h1>Student Dashboard</h1>
-  </div>
+  <div class="container-nav">
+    <div class="brand">
+      <div class="logo">👥</div>
+      <h1>AttendEase</h1>
+    </div>
 
-  <nav class="nav">
-  <ul class="navbar">
-    <li><a href="index.php">Home</a></li>
-    <li><a href="students.php">Manage Students</a></li>
-    <li><a href="sessions.php">Sessions / Attendance</a></li>
-    <li><a href="reports.php">Reports</a></li>
-    <li><a href="logout.php">Logout</a></li>
-  </ul>
-</nav>
+    <nav class="nav">
+      <ul class="navbar">
+        <li><a href="index.php">Dashboard</a></li>
+        <li><a href="students.php" class="active">Students</a></li>
+        <li><a href="sessions.php">Sessions</a></li>
+        <li><a href="reports.php">Analytics</a></li>
+        <li><a href="logout.php">Logout</a></li>
+      </ul>
+    </nav>
+  </div>
 </header>
 
-<main style="padding:20px; max-width:1400px; margin:0 auto;">
+<main style="padding:40px 30px; max-width:1400px; margin:0 auto;">
 
-    <!-- Page title (OPTION C) -->
-    <h1 style="color:#A6615A; margin-bottom:10px;">Student Management</h1>
-    <p style="color:#666; margin-bottom:25px;">Add, update, and delete students (Tutorial 2 + Tutorial 3)</p>
+    <h1 style="color:var(--dark-purple); margin-bottom:10px; font-size: 32px;">Student Registry</h1>
+    <p style="color:var(--text-light); margin-bottom:30px;">Manage student enrollments and information</p>
 
-    <!-- MESSAGES -->
     <?php if ($message): ?>
         <div class="message success"><?php echo htmlspecialchars($message); ?></div>
     <?php endif; ?>
@@ -143,11 +143,11 @@ if ($conn) {
         <div class="message error"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
 
-    <div style="display:grid; grid-template-columns:1fr 2fr; gap:20px;">
+    <div style="display:grid; grid-template-columns:1fr 2fr; gap:25px;">
 
         <!-- Add / Edit Form -->
         <div class="card">
-            <h2><?php echo $editStudent ? 'Edit Student' : 'Add New Student'; ?></h2>
+            <h2><?php echo $editStudent ? 'Edit Student Record' : 'Register New Student'; ?></h2>
 
             <form id="studentForm" method="POST" action="" class="student-form" novalidate>
                 <?php if ($editStudent): ?>
@@ -156,18 +156,24 @@ if ($conn) {
 
                 <label for="fullname">Full Name *</label>
                 <input type="text" id="fullname" name="fullname"
-                       value="<?php echo htmlspecialchars($editStudent['fullname'] ?? ''); ?>" required>
+                       value="<?php echo htmlspecialchars($editStudent['fullname'] ?? ''); ?>" 
+                       placeholder="Enter full name"
+                       required>
 
-                <label for="matricule">Matricule *</label>
+                <label for="matricule">Matricule Number *</label>
                 <input type="text" id="matricule" name="matricule"
-                       value="<?php echo htmlspecialchars($editStudent['matricule'] ?? ''); ?>" required>
+                       value="<?php echo htmlspecialchars($editStudent['matricule'] ?? ''); ?>" 
+                       placeholder="Enter matricule (numbers only)"
+                       required>
 
-                <label for="group_id">Group *</label>
+                <label for="group_id">Group / Section *</label>
                 <input type="text" id="group_id" name="group_id"
-                       value="<?php echo htmlspecialchars($editStudent['group_id'] ?? ''); ?>" required>
+                       value="<?php echo htmlspecialchars($editStudent['group_id'] ?? ''); ?>" 
+                       placeholder="e.g., G1, G2"
+                       required>
 
                 <button type="submit">
-                    <?php echo $editStudent ? 'Update Student' : 'Add Student'; ?>
+                    <?php echo $editStudent ? '💾 Update Student' : '➕ Add Student'; ?>
                 </button>
 
                 <?php if ($editStudent): ?>
@@ -180,10 +186,13 @@ if ($conn) {
 
         <!-- Student List -->
         <div class="card">
-            <h2>Students List (<?php echo count($students); ?>)</h2>
+            <h2>Enrolled Students (<?php echo count($students); ?>)</h2>
 
             <?php if (empty($students)): ?>
-                <div class="empty"><p>No students found. Add your first student!</p></div>
+                <div class="empty">
+                    <p>📋 No students enrolled yet.</p>
+                    <p>Use the form on the left to register your first student!</p>
+                </div>
             <?php else: ?>
                 <div class="table-wrap">
                     <table class="table">
@@ -193,7 +202,7 @@ if ($conn) {
                                 <th>Full Name</th>
                                 <th>Matricule</th>
                                 <th>Group</th>
-                                <th>Created</th>
+                                <th>Registered</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -201,16 +210,16 @@ if ($conn) {
                             <?php foreach ($students as $student): ?>
                                 <tr>
                                     <td><?php echo $student['id']; ?></td>
-                                    <td><?php echo htmlspecialchars($student['fullname']); ?></td>
+                                    <td><strong><?php echo htmlspecialchars($student['fullname']); ?></strong></td>
                                     <td><?php echo htmlspecialchars($student['matricule']); ?></td>
-                                    <td><?php echo htmlspecialchars($student['group_id']); ?></td>
-                                    <td><?php echo date('Y-m-d', strtotime($student['created_at'])); ?></td>
+                                    <td><span style="background:var(--bg-light); padding:4px 12px; border-radius:12px;"><?php echo htmlspecialchars($student['group_id']); ?></span></td>
+                                    <td><?php echo date('M d, Y', strtotime($student['created_at'])); ?></td>
 
                                     <td>
-                                        <a href="students.php?edit=<?php echo $student['id']; ?>" class="btn btn-edit">Edit</a>
+                                        <a href="students.php?edit=<?php echo $student['id']; ?>" class="btn btn-edit">✏️ Edit</a>
                                         <a href="students.php?delete=<?php echo $student['id']; ?>"
-                                           onclick="return confirm('Are you sure?');"
-                                           class="btn warn">Delete</a>
+                                           onclick="return confirm('Are you sure you want to delete this student?');"
+                                           class="btn warn">🗑️ Delete</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -222,8 +231,12 @@ if ($conn) {
     </div>
 
 </main>
+
+<footer class="footer">
+  <p>AttendEase Academic Management System © <?php echo date('Y'); ?></p>
+</footer>
+
 <script>
-// Tutorial 2: Client-side validation (restored)
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('studentForm');
     const fullname = document.getElementById('fullname');
@@ -235,16 +248,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!errorDiv || !errorDiv.classList.contains('field-error')) {
             errorDiv = document.createElement('div');
             errorDiv.className = 'field-error';
+            errorDiv.style.cssText = 'color:#EF4444; font-size:13px; margin-top:5px;';
             field.parentNode.insertBefore(errorDiv, field.nextSibling);
         }
         errorDiv.textContent = message;
-        errorDiv.style.color = '#ef4444';
-        field.style.borderColor = message ? '#ef4444' : '#ddd';
+        field.style.borderColor = message ? '#EF4444' : 'var(--border)';
     }
 
     function validateName(value) {
         if (!value.trim()) return 'Full name is required';
-        if (!/^[A-Za-z\s]+$/.test(value)) return 'Full name must contain only letters';
+        if (!/^[A-Za-z\s]+$/.test(value)) return 'Name must contain only letters';
         return '';
     }
 
@@ -259,17 +272,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return '';
     }
 
-    fullname.addEventListener('blur', () =>
-        showError(fullname, validateName(fullname.value))
-    );
-
-    matricule.addEventListener('blur', () =>
-        showError(matricule, validateMatricule(matricule.value))
-    );
-
-    group_id.addEventListener('blur', () =>
-        showError(group_id, validateGroup(group_id.value))
-    );
+    fullname.addEventListener('blur', () => showError(fullname, validateName(fullname.value)));
+    matricule.addEventListener('blur', () => showError(matricule, validateMatricule(matricule.value)));
+    group_id.addEventListener('blur', () => showError(group_id, validateGroup(group_id.value)));
 
     form.addEventListener('submit', function(e) {
         const nameErr = validateName(fullname.value);

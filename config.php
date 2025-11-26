@@ -1,20 +1,28 @@
 <?php
 /**
- * Tutorial 3 - Exercise 3
- * config.php
- * Database configuration file
+ * AttendEase System Configuration
+ * Database and System Settings
  */
 
-// Database connection settings
+// Database connection parameters
 define('DB_HOST', 'localhost');
 define('DB_USERNAME', 'root');
-define('DB_PASSWORD', '');  // Default WAMP password is empty
-define('DB_NAME', 'student_dashboard');
+define('DB_PASSWORD', '');  // Default WAMP/XAMPP password
+define('DB_NAME', 'attendease_db');
 
-// Optional: Set timezone
+// System timezone
 date_default_timezone_set('Africa/Algiers');
 
-// Optional: Error reporting (set to 0 in production)
+// Development mode (set to 0 in production)
 define('DISPLAY_ERRORS', 1);
+define('DEBUG_MODE', 1);
+
+// Application settings
+define('APP_NAME', 'AttendEase');
+define('APP_VERSION', '2.0');
+
+// Session configuration
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
 
 ?>

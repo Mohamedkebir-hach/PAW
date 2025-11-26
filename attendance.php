@@ -1,9 +1,6 @@
 <?php
 /**
- * attendance.php
- * Attendance UI for a selected session (Tutorial 3)
- * - Requires: GET param session_id
- * - Saves via save_attendance.php (expects JSON POST)
+ * AttendEase - Attendance Recording Module
  */
 
 require_once 'db_connect.php';
@@ -37,11 +34,9 @@ if (!$sessionId) {
 // Load students and attendance records if session ok
 if (!$sessionError && $conn) {
     try {
-        // Students list
         $stmt = $conn->query("SELECT id, fullname, matricule, group_id FROM students ORDER BY fullname ASC");
         $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Attendance records for this session (if any)
         $stmt = $conn->prepare("SELECT student_id, status, participated FROM attendance_records WHERE session_id = ?");
         $stmt->execute([$sessionId]);
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
@@ -57,44 +52,47 @@ if (!$sessionError && $conn) {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Attendance Session<?php if ($sessionRow) echo ' — ' . htmlspecialchars($sessionRow['course_id']); ?></title>
+    <title>Record Attendance<?php if ($sessionRow) echo ' — ' . htmlspecialchars($sessionRow['course_id']); ?> - AttendEase</title>
     <link rel="stylesheet" href="style.css" />
-    <!-- jQuery + Chart.js (CDN) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Small page-specific tweaks */
-        .page-container { padding: 20px; max-width: 1200px; margin: 0 auto; }
-        .page-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:12px; flex-wrap:wrap; }
-        .page-title h2 { margin:0; color:#A6615A; }
-        .session-meta { color:#555; font-size:14px; }
-        .attendance-table th, .attendance-table td { padding:8px; font-size:13px; }
-        .controls-bar { margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; }
-        .btn-sm { padding:8px 12px; border-radius:6px; border:none; background:#A6615A; color:#fff; cursor:pointer; }
-        .btn-sm.secondary { background:#555; }
-        .save-indicator { font-size:13px; color:#333; margin-left:8px; }
-        .message.error { padding:10px; background:#f8d7da; color:#721c24; border-radius:6px; margin-bottom:15px; }
+        .page-container { padding: 40px 30px; max-width: 1400px; margin: 0 auto; }
+        .page-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; gap:15px; flex-wrap:wrap; }
+        .page-title h2 { margin:0; color:var(--dark-purple); font-size:32px; }
+        .session-meta { color:var(--text-light); font-size:15px; margin-top:8px; }
+        .session-meta strong { color:var(--dark-purple); }
+        .attendance-table th, .attendance-table td { padding:10px 12px; font-size:14px; }
+        .controls-bar { margin-top:20px; display:flex; gap:12px; flex-wrap:wrap; }
+        .btn-sm { padding:10px 18px; border-radius:8px; border:none; background:var(--primary-purple); color:#fff; cursor:pointer; font-weight:600; }
+        .btn-sm.secondary { background:var(--text-light); }
+        .btn-sm:hover { opacity:0.9; transform:translateY(-2px); }
+        .save-indicator { font-size:14px; color:var(--success); margin-left:10px; font-weight:600; }
+        .message.error { padding:15px 20px; background:#FEE2E2; color:#991B1B; border-radius:10px; margin-bottom:20px; border-left:4px solid #EF4444; }
+        .report-panel { background:var(--bg-light); padding:25px; border-radius:12px; margin-top:25px; }
+        .report-panel h3 { color:var(--dark-purple); margin-bottom:15px; }
     </style>
 </head>
 <body>
 
-<!-- TOP HEADER (same as index & students) -->
 <header class="topbar">
-  <div class="brand" style="display:flex;align-items:center;gap:10px;">
-    <!-- local screenshot image path you uploaded (will be transformed if needed) -->
-    <div class="logo">📚</div>
-    <h1 style="margin:0;font-size:18px;">Student Dashboard</h1>
+  <div class="container-nav">
+    <div class="brand">
+      <div class="logo">📋</div>
+      <h1>AttendEase</h1>
+    </div>
+    
+    <nav class="nav">
+      <ul class="navbar">
+        <li><a href="index.php">Dashboard</a></li>
+        <li><a href="students.php">Students</a></li>
+        <li><a href="sessions.php" class="active">Sessions</a></li>
+        <li><a href="reports.php">Analytics</a></li>
+        <li><a href="logout.php">Logout</a></li>
+      </ul>
+    </nav>
   </div>
-  
-  <nav class="nav">
-  <ul class="navbar">
-    <li><a href="index.php">Home</a></li>
-    <li><a href="students.php">Manage Students</a></li>
-    <li><a href="sessions.php">Sessions / Attendance</a></li>
-    <li><a href="reports.php">Reports</a></li>
-    <li><a href="logout.php">Logout</a></li>
-  </ul>
-</nav>
 </header>
 
 <main class="page-container">
@@ -102,30 +100,29 @@ if (!$sessionError && $conn) {
     <?php if ($sessionError): ?>
         <div class="message error">
             <?= htmlspecialchars($sessionError) ?><br>
-            <a href="sessions.php" style="color:#721c24; text-decoration:underline;">Go back to Sessions</a>
+            <a href="sessions.php" style="color:#991B1B; text-decoration:underline; font-weight:600;">← Back to Sessions</a>
         </div>
     <?php else: ?>
 
     <div class="page-title">
         <div>
-            <h2>Attendance Session</h2>
+            <h2>📋 Attendance Recording</h2>
             <div class="session-meta">
                 Course: <strong><?= htmlspecialchars($sessionRow['course_id']) ?></strong> ·
                 Group: <strong><?= htmlspecialchars($sessionRow['group_id']) ?></strong> ·
-                Date: <strong><?= htmlspecialchars($sessionRow['date']) ?></strong> ·
-                Session ID: <strong><?= (int)$sessionRow['id'] ?></strong>
+                Date: <strong><?= date('M d, Y', strtotime($sessionRow['date'])) ?></strong> ·
+                Session: <strong>#<?= (int)$sessionRow['id'] ?></strong>
             </div>
         </div>
 
-        <div style="display:flex;align-items:center;">
-            <a href="sessions.php" class="btn-sm secondary" style="text-decoration:none; margin-right:8px;">← Back to Sessions</a>
-            <button id="saveAll" class="btn-sm">Save All</button>
+        <div style="display:flex;align-items:center; gap:10px;">
+            <a href="sessions.php" class="btn-sm secondary" style="text-decoration:none;">← Back</a>
+            <button id="saveAll" class="btn-sm">💾 Save All</button>
             <div id="saveStatus" class="save-indicator" aria-live="polite"></div>
         </div>
     </div>
 
-    <!-- Attendance table -->
-    <div style="overflow-x:auto;">
+    <div class="card" style="overflow-x:auto;">
         <table class="attendance-table table">
             <thead>
                 <tr>
@@ -137,14 +134,14 @@ if (!$sessionError && $conn) {
                     <?php endfor; ?>
                     <th>Absences</th>
                     <th>Participation</th>
-                    <th>Message</th>
+                    <th>Status Message</th>
                 </tr>
             </thead>
             <tbody id="attendanceBody">
                 <?php if (empty($students)): ?>
                     <tr>
-                        <td colspan="18" style="text-align:center; padding:40px; color:#666;">
-                            No students in database. <a href="students.php">Add students first</a>
+                        <td colspan="18" style="text-align:center; padding:50px; color:var(--text-light);">
+                            No students in database. <a href="students.php" style="color:var(--primary-purple);">Add students first</a>
                         </td>
                     </tr>
                 <?php else: ?>
@@ -157,7 +154,7 @@ if (!$sessionError && $conn) {
                         $partFromDb = $rec && (int)$rec['participated'] === 1;
                     ?>
                     <tr data-student-id="<?= (int)$student['id'] ?>" data-matricule="<?= htmlspecialchars($student['matricule']) ?>">
-                        <td><?= htmlspecialchars($last) ?></td>
+                        <td><strong><?= htmlspecialchars($last) ?></strong></td>
                         <td><?= htmlspecialchars($first) ?></td>
 
                         <?php for ($j=0;$j<6;$j++): ?>
@@ -181,26 +178,29 @@ if (!$sessionError && $conn) {
         </table>
     </div>
 
-    <!-- Controls + Report -->
     <div class="controls-bar">
-        <button id="showReport" class="btn-sm">Show Report</button>
-        <button id="highlightExcellent" class="btn-sm">Highlight Excellent Students</button>
-        <button id="resetColors" class="btn-sm secondary">Reset Colors</button>
+        <button id="showReport" class="btn-sm">📊 Show Report</button>
+        <button id="highlightExcellent" class="btn-sm">⭐ Highlight Excellent</button>
+        <button id="resetColors" class="btn-sm secondary">🔄 Reset Colors</button>
     </div>
 
-    <div id="reportSection" class="report-panel" style="display:none; margin-top:18px;">
-        <h3>Attendance Report</h3>
-        <p>
-            Total students: <span id="reportTotal">0</span> ·
-            Present (≥1): <span id="reportPresent">0</span> ·
-            Participated (≥1): <span id="reportParticipated">0</span>
+    <div id="reportSection" class="report-panel" style="display:none;">
+        <h3>Attendance Summary</h3>
+        <p style="color:var(--text-light); font-size:15px;">
+            Total students: <strong id="reportTotal">0</strong> ·
+            Present (≥1): <strong id="reportPresent">0</strong> ·
+            Participated (≥1): <strong id="reportParticipated">0</strong>
         </p>
-        <div style="max-width:700px;"><canvas id="reportChart" height="120"></canvas></div>
+        <div style="max-width:700px; margin-top:20px;"><canvas id="reportChart" height="120"></canvas></div>
     </div>
 
-    <?php endif; // end session ok ?>
+    <?php endif; ?>
 
 </main>
+
+<footer class="footer">
+  <p>AttendEase Academic Management System © <?= date('Y') ?></p>
+</footer>
 
 <script>
 (function(){
@@ -225,12 +225,11 @@ if (!$sessionError && $conn) {
         row.querySelector('.absences-count').textContent = abs + ' Abs';
         row.querySelector('.participation-count').textContent = par + ' Par';
 
-        // message logic
         let message = '';
-        if (abs >= 5) message = 'Excluded — too many absences — You need to participate more';
-        else if (abs >= 3) message = 'Warning — attendance low — You need to participate more';
-        else if (par >= 4) message = 'Good attendance — Excellent participation';
-        else message = 'Good attendance — Work on participation';
+        if (abs >= 5) message = 'Excluded — too many absences';
+        else if (abs >= 3) message = 'Warning — attendance low';
+        else if (par >= 4) message = 'Excellent participation ⭐';
+        else message = 'Good attendance';
 
         row.querySelector('.message-cell').textContent = message;
 
@@ -269,27 +268,23 @@ if (!$sessionError && $conn) {
 
     function saveRowToServer(row, indicatorEl=null) {
         if (!SESSION_ID) {
-            // Just save locally
             saveRowLocal(row);
-            if (indicatorEl) indicatorEl.textContent = 'Saved locally';
+            if (indicatorEl) indicatorEl.textContent = '💾 Saved locally';
             return Promise.resolve({local:true});
         }
         const payload = rowToPayload(row);
-        // show saving indicator if provided
-        if (indicatorEl) indicatorEl.textContent = 'Saving...';
+        if (indicatorEl) indicatorEl.textContent = '⏳ Saving...';
         return fetch('save_attendance.php', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify(payload)
         }).then(r => r.json())
           .then(json => {
-              if (indicatorEl) indicatorEl.textContent = (json && json.success) ? 'Saved' : 'Error';
-              // also persist locally as mirror
+              if (indicatorEl) indicatorEl.textContent = (json && json.success) ? '✅ Saved' : '❌ Error';
               saveRowLocal(row);
               return json;
           }).catch(err => {
-              if (indicatorEl) indicatorEl.textContent = 'Error';
-              // fallback: save locally
+              if (indicatorEl) indicatorEl.textContent = '❌ Error';
               saveRowLocal(row);
               return {error:true};
           });
@@ -306,7 +301,6 @@ if (!$sessionError && $conn) {
         row.querySelectorAll('.present-check, .participated-check').forEach(ch => {
             ch.addEventListener('change', function(){
                 updateRow(row);
-                // debounce server save per row
                 if (row._saveTimer) clearTimeout(row._saveTimer);
                 row._saveTimer = setTimeout(()=> {
                     saveRowToServer(row, document.getElementById('saveStatus'));
@@ -324,25 +318,22 @@ if (!$sessionError && $conn) {
         document.getElementById('saveAll')?.addEventListener('click', function(){
             const rows = document.querySelectorAll('#attendanceBody tr[data-student-id]');
             const indicator = document.getElementById('saveStatus');
-            indicator.textContent = 'Saving...';
+            indicator.textContent = '⏳ Saving all...';
             let promises = [];
             rows.forEach(r => promises.push(saveRowToServer(r)));
             Promise.all(promises).then(() => {
-                indicator.textContent = 'All saved';
-                setTimeout(()=> indicator.textContent = '', 2000);
+                indicator.textContent = '✅ All saved';
+                setTimeout(()=> indicator.textContent = '', 3000);
             });
         });
 
         document.getElementById('showReport')?.addEventListener('click', function(){
             const rows = document.querySelectorAll('#attendanceBody tr[data-student-id]');
             const total = rows.length;
-            let present = 0;
-            let participated = 0;
+            let present = 0, participated = 0;
             rows.forEach(r => {
-                const absText = r.querySelector('.absences-count').textContent;
-                const abs = parseInt(absText) || 0;
-                const partText = r.querySelector('.participation-count').textContent;
-                const part = parseInt(partText) || 0;
+                const abs = parseInt(r.querySelector('.absences-count').textContent) || 0;
+                const part = parseInt(r.querySelector('.participation-count').textContent) || 0;
                 if (abs < 6) present++;
                 if (part > 0) participated++;
             });
@@ -356,41 +347,47 @@ if (!$sessionError && $conn) {
             window._attendanceChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Total', 'Present (≥1)', 'Participated (≥1)'],
-                    datasets: [{ label: 'Counts', data: [total, present, participated], backgroundColor: ['#A6615A', '#10B981', '#06B6D4'] }]
+                    labels: ['Total Students', 'Present (≥1)', 'Participated (≥1)'],
+                    datasets: [{ 
+                        label: 'Count', 
+                        data: [total, present, participated], 
+                        backgroundColor: ['#6D28D9', '#10B981', '#06B6D4'] 
+                    }]
                 },
-                options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+                options: { 
+                    responsive:true, 
+                    plugins:{legend:{display:false}}, 
+                    scales:{y:{beginAtZero:true}} 
+                }
             });
         });
 
         document.getElementById('highlightExcellent')?.addEventListener('click', function(){
             document.querySelectorAll('#attendanceBody tr[data-student-id]').forEach(row=>{
-                const absText = row.querySelector('.absences-count').textContent;
-                const abs = parseInt(absText) || 0;
-                if (abs < 3) row.classList.add('animate-glow');
+                const abs = parseInt(row.querySelector('.absences-count').textContent) || 0;
+                if (abs < 3) {
+                    row.style.boxShadow = '0 0 15px rgba(109, 40, 217, 0.5)';
+                    row.style.transform = 'scale(1.02)';
+                }
             });
         });
 
         document.getElementById('resetColors')?.addEventListener('click', function(){
             document.querySelectorAll('#attendanceBody tr').forEach(row => {
-                row.classList.remove('animate-glow','hover-highlight','row-red','row-yellow','row-green');
-                updateRow(row);
+                row.style.boxShadow = '';
+                row.style.transform = '';
+                row.classList.remove('row-red','row-yellow','row-green');
+                if (row.dataset.studentId) updateRow(row);
             });
         });
 
-        // jQuery hover & click interactions (keeps your previous UX)
-        $('#attendanceBody').on('mouseenter', 'tr[data-student-id]', function(){ $(this).addClass('hover-highlight'); })
-                            .on('mouseleave','tr[data-student-id]', function(){ $(this).removeClass('hover-highlight'); })
-                            .on('click','tr[data-student-id]', function(e){
-                                if ($(e.target).is('input')) return;
-                                const last = $(this).find('td').eq(0).text();
-                                const first = $(this).find('td').eq(1).text();
-                                const abs = $(this).find('.absences-count').text();
-                                alert('Student: ' + last + ' ' + first + '\n' + abs);
-                            });
+        $('#attendanceBody').on('mouseenter', 'tr[data-student-id]', function(){ 
+            $(this).css('background', 'var(--bg-light)'); 
+        }).on('mouseleave','tr[data-student-id]', function(){ 
+            $(this).css('background', ''); 
+        });
     }
 
-    // initialize on DOM ready
     document.addEventListener('DOMContentLoaded', init);
 })();
 </script>

@@ -1,4 +1,7 @@
 <?php
+/**
+ * AttendEase - Analytics & Reports Module
+ */
 require_once 'db_connect.php';
 
 $conn = getConnection();
@@ -33,83 +36,102 @@ if ($conn) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports & Statistics</title>
+    <title>Analytics & Reports - AttendEase</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
 <header class="topbar">
-  <div class="brand">
-    <div class="logo">📊</div>
-    <h1>Student Dashboard</h1>
-  </div>
+  <div class="container-nav">
+    <div class="brand">
+      <div class="logo">📊</div>
+      <h1>AttendEase</h1>
+    </div>
 
- <nav class="nav">
-  <ul class="navbar">
-    <li><a href="index.php">Home</a></li>
-    <li><a href="students.php">Manage Students</a></li>
-    <li><a href="sessions.php">Sessions / Attendance</a></li>
-    <li><a href="reports.php">Reports</a></li>
-    <li><a href="logout.php">Logout</a></li>
-  </ul>
-</nav>
+    <nav class="nav">
+      <ul class="navbar">
+        <li><a href="index.php">Dashboard</a></li>
+        <li><a href="students.php">Students</a></li>
+        <li><a href="sessions.php">Sessions</a></li>
+        <li><a href="reports.php" class="active">Analytics</a></li>
+        <li><a href="logout.php">Logout</a></li>
+      </ul>
+    </nav>
+  </div>
 </header>
 
-<main style="padding:20px; max-width:1200px; margin:0 auto;">
+<main style="padding:40px 30px; max-width:1200px; margin:0 auto;">
 
-    <h1 style="color:#A6615A; margin-bottom:10px;">Reports & Statistics</h1>
-    <p style="color:#666; margin-bottom:25px;">Overview of system statistics</p>
+    <h1 style="color:var(--dark-purple); margin-bottom:10px; font-size:32px;">Analytics & Reports</h1>
+    <p style="color:var(--text-light); margin-bottom:30px;">System statistics and insights</p>
 
     <?php if ($error): ?>
         <div class="message error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <div class="stats-grid" style="gap:20px; margin-bottom:30px;">
-        <div class="card small">
+    <div class="stats-grid" style="gap:20px; margin-bottom:40px;">
+        <div class="stat-glass">
             <h3><?= $stats['total_students'] ?></h3>
             <p>Total Students</p>
         </div>
 
-        <div class="card small">
+        <div class="stat-glass">
             <h3><?= $stats['total_sessions'] ?></h3>
             <p>Total Sessions</p>
         </div>
 
-        <div class="card small">
-            <h3 style="color:#10B981;"><?= $stats['open_sessions'] ?></h3>
-            <p>Open Sessions</p>
+        <div class="stat-glass">
+            <h3 style="color:var(--success);"><?= $stats['open_sessions'] ?></h3>
+            <p>Active Sessions</p>
         </div>
 
-        <div class="card small">
-            <h3 style="color:#6c757d;"><?= $stats['closed_sessions'] ?></h3>
-            <p>Closed Sessions</p>
+        <div class="stat-glass">
+            <h3 style="color:var(--text-light);"><?= $stats['closed_sessions'] ?></h3>
+            <p>Completed</p>
         </div>
     </div>
 
     <div class="card">
-        <h2 style="color:#A6615A;">Students by Group</h2>
+        <h2 style="color:var(--dark-purple);">Student Distribution by Group</h2>
 
         <?php if (empty($stats['groups'])): ?>
-            <p style="text-align:center; padding:40px; color:#666;">No data available</p>
+            <div class="empty">
+                <p>📊 No data available yet.</p>
+                <p>Add students to see group distribution.</p>
+            </div>
         <?php else: ?>
-            <div style="max-width:600px; margin:20px auto;">
+            <div style="max-width:600px; margin:30px auto;">
                 <canvas id="groupChart"></canvas>
             </div>
 
-            <table class="table" style="max-width:400px; margin:20px auto;">
+            <table class="table" style="max-width:500px; margin:30px auto;">
                 <thead>
                     <tr>
-                        <th>Group</th>
+                        <th>Group / Section</th>
                         <th>Number of Students</th>
+                        <th>Percentage</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($stats['groups'] as $g): ?>
+                    <?php 
+                    $total = array_sum(array_column($stats['groups'], 'count'));
+                    foreach ($stats['groups'] as $g): 
+                        $percentage = $total > 0 ? round(($g['count'] / $total) * 100, 1) : 0;
+                    ?>
                         <tr>
-                            <td><?= htmlspecialchars($g['group_id']) ?></td>
+                            <td><strong><?= htmlspecialchars($g['group_id']) ?></strong></td>
                             <td><?= $g['count'] ?></td>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <div style="flex:1; background:var(--bg-light); height:8px; border-radius:4px; overflow:hidden;">
+                                        <div style="background:var(--primary-purple); height:100%; width:<?= $percentage ?>%;"></div>
+                                    </div>
+                                    <span><?= $percentage ?>%</span>
+                                </div>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -119,9 +141,17 @@ if ($conn) {
 
 </main>
 
+<footer class="footer">
+  <p>AttendEase Academic Management System © <?= date('Y') ?></p>
+</footer>
+
 <script>
 <?php if (!empty($stats['groups'])): ?>
 const ctx = document.getElementById('groupChart').getContext('2d');
+
+const colors = [
+    '#6D28D9', '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE'
+];
 
 new Chart(ctx, {
     type: 'pie',
@@ -130,14 +160,35 @@ new Chart(ctx, {
         datasets: [{
             label: 'Students per Group',
             data: <?= json_encode(array_column($stats['groups'], 'count')) ?>,
-            backgroundColor: [
-                '#A6615A', '#10B981', '#06B6D4', '#F59E0B', '#EF4444', '#6366F1'
-            ]
+            backgroundColor: colors,
+            borderWidth: 2,
+            borderColor: '#fff'
         }]
     },
     options: {
-        responsive:true,
-        plugins:{ legend:{ position:'bottom' } }
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 15,
+                    font: {
+                        size: 14,
+                        family: 'Inter'
+                    }
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                        return context.label + ': ' + context.parsed + ' students (' + percentage + '%)';
+                    }
+                }
+            }
+        }
     }
 });
 <?php endif; ?>

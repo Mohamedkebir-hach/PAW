@@ -1,0 +1,236 @@
+/* =========================
+   Modern Unique Purple Theme
+   ========================= */
+
+/* GLOBAL */
+body {
+  font-family: "Poppins", Arial, sans-serif;
+  margin: 0;
+  background-color: #F5F3FF;
+  color: #2D1B69;
+}
+
+/* NAVIGATION */
+nav {
+  background: #6D28D9;
+  padding: 15px 0;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+}
+
+.navbar {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  transition: 0.2s ease;
+}
+
+.navbar a:hover,
+.navbar a.active {
+  color: #C084FC;
+}
+
+/* MAIN */
+main {
+  padding: 35px;
+  text-align: center;
+}
+
+/* TABLE */
+.table-wrap { overflow:auto; }
+
+table {
+  margin: 25px auto;
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 1200px;
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(109,40,217,0.15);
+}
+
+th, td {
+  border-bottom: 1px solid #E9D8FD;
+  padding: 14px;
+  text-align: center;
+}
+
+th {
+  background-color: #6D28D9;
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+td {
+  color: #2D1B69;
+}
+
+/* FORM */
+.student-form {
+  background: white;
+  padding: 28px;
+  width: 380px;
+  margin: 0 auto;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(109,40,217,0.15);
+}
+
+.student-form label {
+  font-weight: 600;
+  margin-top: 12px;
+  color: #4C1D95;
+}
+
+.student-form input {
+  padding: 11px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 2px solid #E9D8FD;
+  transition: 0.25s;
+}
+
+.student-form input:focus {
+  border-color: #8B5CF6;
+  outline: none;
+}
+
+/* BUTTONS */
+button, .btn {
+  margin-top: 18px;
+  background-color: #6D28D9;
+  color: white;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+button:hover,
+.btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(109,40,217,0.25);
+  background-color: #5B21B6;
+}
+
+.btn.outline {
+  background: transparent;
+  color: #6D28D9;
+  border: 2px solid #6D28D9;
+}
+
+.btn.outline:hover {
+  background: #EDE9FE;
+}
+
+.btn.warn {
+  background: #DC2626;
+}
+
+.btn.warn:hover {
+  box-shadow: 0 8px 20px rgba(220,38,38,0.35);
+}
+
+/* STATUS ROWS */
+.row-green td { background: #E9FDF1 !important; }
+.row-yellow td { background: #FFF8D6 !important; }
+.row-red td { background: #FFE4E6 !important; }
+
+/* HERO */
+.hero-container {
+    min-height: 55vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #6D28D9, #8B5CF6);
+    padding: 50px 20px;
+}
+
+.hero-glass {
+    background: rgba(255,255,255,0.18);
+    padding: 45px;
+    border-radius: 25px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    max-width: 760px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(109,40,217,0.25);
+}
+
+.hero-title {
+    font-size: 46px;
+    font-weight: 700;
+    color: white;
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    color: rgba(255,255,255,0.93);
+}
+
+/* HERO BUTTONS */
+.hero-btn {
+    padding: 12px 26px;
+    background: white;
+    color: #6D28D9;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+.hero-btn:hover {
+    transform: translateY(-4px);
+}
+
+.hero-btn.secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+/* CARDS */
+.card {
+  background:white;
+  padding:20px;
+  border-radius:16px;
+  box-shadow: 0 8px 20px rgba(109,40,217,0.10);
+  margin-bottom:15px;
+}
+
+/* FEATURE BOXES */
+.feature-box {
+  background: white;
+  padding: 22px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-left: 4px solid #8B5CF6;
+  transition: 0.25s ease;
+}
+
+.feature-box:hover {
+  transform: translateX(6px);
+}
+
+/* FOOTER */
+.footer {
+  background: #4C1D95;
+  color: white;
+  text-align: center;
+  padding: 22px;
+  margin-top: 50px;
+}
+
+

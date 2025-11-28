@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CampusConnect — Ajouter un étudiant</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome (icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Top navbar -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <i class="fa-solid fa-school"></i>
+        <span class="brand-text">CampusConnect</span>
+      </div>
+      <nav class="top-actions">
+        <!-- Placeholder for right-side actions -->
+        <button class="icon-btn" title="Notifications"><i class="fa-regular fa-bell"></i></button>
+        <button class="profile-btn" title="Mon compte">
+          <i class="fa-regular fa-user"></i>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="main">
+    <div class="container page-grid">
+      <div class="panel add-student-card">
+        <div class="panel-header">
+          <h2><i class="fa-solid fa-user-plus"></i> Ajouter un Nouveau Étudiant</h2>
+        </div>
+
+        <form id="studentForm" class="student-form" novalidate>
+          <label class="form-row">
+            <span class="label">ID Étudiant</span>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-hashtag"></i>
+              <input type="text" name="studentId" id="studentId" placeholder="Ex: 2024001" required pattern="\d{4,}" />
+            </div>
+            <small class="hint">Entrez l'ID (ex : 2024001)</small>
+          </label>
+
+          <label class="form-row">
+            <span class="label">Nom complet</span>
+            <div class="input-with-icon">
+              <i class="fa-regular fa-user"></i>
+              <input type="text" name="fullName" id="fullName" placeholder="Ex: Sara Ahmed" required />
+            </div>
+          </label>
+
+          <label class="form-row">
+            <span class="label">Groupe</span>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-users-rectangle"></i>
+              <input type="text" name="group" id="group" placeholder="Ex: G1 ou TD-A" required />
+            </div>
+          </label>
+
+          <div class="form-row actions">
+            <button type="submit" class="btn primary">
+              <i class="fa-solid fa-user-plus"></i>
+              Ajouter l’étudiant
+            </button>
+            <button type="button" id="clearBtn" class="btn secondary">Annuler</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Empty left area to mimic large left whitespace from the video -->
+      <aside class="left-space" aria-hidden="true"></aside>
+    </div>
+  </main>
+
+  <!-- Toast / notification -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
+
+
+
+

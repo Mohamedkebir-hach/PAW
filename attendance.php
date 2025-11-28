@@ -1,6 +1,7 @@
 <?php
 /**
  * AttendEase - Attendance Recording Module
+ * Exercise 7 Implementation
  */
 
 require_once 'db_connect.php';
@@ -72,6 +73,15 @@ if (!$sessionError && $conn) {
         .message.error { padding:15px 20px; background:#FEE2E2; color:#991B1B; border-radius:10px; margin-bottom:20px; border-left:4px solid #EF4444; }
         .report-panel { background:var(--bg-light); padding:25px; border-radius:12px; margin-top:25px; }
         .report-panel h3 { color:var(--dark-purple); margin-bottom:15px; }
+        
+        /* Exercise 7 Styles */
+        .search-sort-container { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .search-box { flex: 1; min-width: 300px; }
+        .search-box label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-dark); }
+        .search-box input { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 15px; }
+        .search-box input:focus { outline: none; border-color: var(--primary); }
+        .sort-buttons { display: flex; gap: 10px; }
+        .sort-mode-display { margin-top: 15px; padding: 12px 18px; background: #E0F2FE; border-radius: 8px; color: #0C4A6E; font-weight: 600; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -122,6 +132,21 @@ if (!$sessionError && $conn) {
         </div>
     </div>
 
+    <!-- Exercise 7: Search and Sort Controls -->
+    <div class="card">
+        <div class="search-sort-container">
+            <div class="search-box">
+                <label for="searchName">Search by Name</label>
+                <input type="text" id="searchName" placeholder="Type a name (first or last)...">
+            </div>
+            <div class="sort-buttons">
+                <button id="sortByAbsences" class="btn-sm">Sort by Absences (Ascending)</button>
+                <button id="sortByParticipation" class="btn-sm">Sort by Participation (Descending)</button>
+            </div>
+        </div>
+        <div id="sortModeDisplay" class="sort-mode-display" style="display:none;"></div>
+    </div>
+
     <div class="card" style="overflow-x:auto;">
         <table class="attendance-table table">
             <thead>
@@ -154,8 +179,8 @@ if (!$sessionError && $conn) {
                         $partFromDb = $rec && (int)$rec['participated'] === 1;
                     ?>
                     <tr data-student-id="<?= (int)$student['id'] ?>" data-matricule="<?= htmlspecialchars($student['matricule']) ?>">
-                        <td><strong><?= htmlspecialchars($last) ?></strong></td>
-                        <td><?= htmlspecialchars($first) ?></td>
+                        <td class="lastname"><strong><?= htmlspecialchars($last) ?></strong></td>
+                        <td class="firstname"><?= htmlspecialchars($first) ?></td>
 
                         <?php for ($j=0;$j<6;$j++): ?>
                             <td>
@@ -206,6 +231,7 @@ if (!$sessionError && $conn) {
 (function(){
     const SESSION_ID = <?= $sessionId && !$sessionError ? (int)$sessionId : 'null' ?>;
     const STORAGE_KEY = 'attendance_data_session_' + (SESSION_ID || 'local');
+    let currentSortMode = '';
 
     function loadAttendanceLocal() {
         try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
@@ -224,6 +250,10 @@ if (!$sessionError && $conn) {
 
         row.querySelector('.absences-count').textContent = abs + ' Abs';
         row.querySelector('.participation-count').textContent = par + ' Par';
+
+        // Store counts as data attributes for sorting
+        row.setAttribute('data-absences', abs);
+        row.setAttribute('data-participation', par);
 
         let message = '';
         if (abs >= 5) message = 'Excluded — too many absences';
@@ -309,11 +339,77 @@ if (!$sessionError && $conn) {
         });
     }
 
+    // Exercise 7: Search functionality using jQuery's .filter()
+    function setupSearch() {
+        $('#searchName').on('keyup', function() {
+            const searchTerm = $(this).val().toLowerCase().trim();
+            
+            $('#attendanceBody tr[data-student-id]').filter(function() {
+                const lastname = $(this).find('.lastname').text().toLowerCase();
+                const firstname = $(this).find('.firstname').text().toLowerCase();
+                const matches = lastname.includes(searchTerm) || firstname.includes(searchTerm);
+                $(this).toggle(matches);
+            });
+        });
+    }
+
+    // Exercise 7: Sort functionality
+    function sortByAbsences() {
+        const tbody = $('#attendanceBody');
+        const rows = tbody.find('tr[data-student-id]').get();
+        
+        rows.sort(function(a, b) {
+            const absA = parseInt($(a).attr('data-absences')) || 0;
+            const absB = parseInt($(b).attr('data-absences')) || 0;
+            return absA - absB; // Ascending order
+        });
+        
+        $.each(rows, function(index, row) {
+            tbody.append(row);
+        });
+        
+        currentSortMode = 'absences ascending';
+        updateSortDisplay();
+    }
+
+    function sortByParticipation() {
+        const tbody = $('#attendanceBody');
+        const rows = tbody.find('tr[data-student-id]').get();
+        
+        rows.sort(function(a, b) {
+            const parA = parseInt($(a).attr('data-participation')) || 0;
+            const parB = parseInt($(b).attr('data-participation')) || 0;
+            return parB - parA; // Descending order
+        });
+        
+        $.each(rows, function(index, row) {
+            tbody.append(row);
+        });
+        
+        currentSortMode = 'participation descending';
+        updateSortDisplay();
+    }
+
+    function updateSortDisplay() {
+        const display = $('#sortModeDisplay');
+        if (currentSortMode) {
+            display.text('Currently sorted by ' + currentSortMode).show();
+        } else {
+            display.hide();
+        }
+    }
+
     function init() {
         document.querySelectorAll('#attendanceBody tr[data-student-id]').forEach(row => {
             updateRow(row);
             bindRowEvents(row);
         });
+
+        // Exercise 7: Initialize search and sort
+        setupSearch();
+        
+        $('#sortByAbsences').on('click', sortByAbsences);
+        $('#sortByParticipation').on('click', sortByParticipation);
 
         document.getElementById('saveAll')?.addEventListener('click', function(){
             const rows = document.querySelectorAll('#attendanceBody tr[data-student-id]');

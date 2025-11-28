@@ -16,7 +16,7 @@ attendease/
 ├── style.css              # Purple theme stylesheet
 ├── script.js              # Client-side JavaScript utilities
 └── README.md              # Documentation (this file) 
-figma link :
+figma link : https://www.figma.com/make/wnSUD7HacYoHb01G6uWOyV/User-Dashboard--Community-?t=YuLbrvZRttcF7pui-20&fullscreen=1 
 <div align="center">
 AttendEase - Empowering Education Through Technology
 Made with 💜 for Academic Excellence
